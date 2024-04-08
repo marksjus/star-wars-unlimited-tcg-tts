@@ -361,14 +361,17 @@ function getCard(player)
   for i=1, #zoneOccupants, 1 do
     -- Checks if we found a deck, and get top card from it.
     if zoneOccupants[i].type == "Deck" then
+      local position = zoneOccupants[i].getPosition()
       local card = zoneOccupants[i].takeObject(
         {
-          position = zoneOccupants[i].getPosition(),
+          position = {position.x, 1, position.z},
         }
       )
       return card
     -- Checks if we found a single card instead.
     elseif zoneOccupants[i].type == "Card" and zoneOccupants[i].getName() ~= "" then
+      local position = zoneOccupants[i].getPosition()
+      zoneOccupants[i].setPosition({position.x, 1, position.z})
       return zoneOccupants[i]
     end
   end
@@ -426,9 +429,7 @@ function onDeckPeek()
       if enemyCard ~= nil then
         VARIABLES.enemyCardGIUD = enemyCard.getGUID()
         enemyCard.setPositionSmooth(hiddenZone.getPosition())
-        Wait.time(function() 
-          enemyCard.setRotationSmooth(Vector(enemyCard.getRotation())+Vector(0,180,0)) 
-        end, 0.1)
+        enemyCard.setRotationSmooth(Vector(enemyCard.getRotation())+Vector(0,180,0)) 
       end
       -- Waits until the enemy card arrives to hidden zone before flipping.    
       Wait.condition(
