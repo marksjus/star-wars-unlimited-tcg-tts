@@ -266,7 +266,7 @@ function setHiddenZone()
     handZone = getObjectFromGUID(CONSTANTS.blueHandZoneGIUD)
   end
   local scale = {5.11, 4.00, 3.59}
-
+  
   hiddenZone = handZone.clone({})
   VARIABLES.hiddenZoneGIUD = hiddenZone.getGUID()
   hiddenZone.setScale(scale)
