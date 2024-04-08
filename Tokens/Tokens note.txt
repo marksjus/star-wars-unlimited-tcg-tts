@@ -1,0 +1,8 @@
+Token infinite dispenser:
+Shield, Damage, Experience, and Modifier token dispenser have contextual menu for configuring token behaviour.
+1. Show tooltip - controls visibility of tooltip on token button.
+2. Negative values - controls whether negative values are allowed on Experience and Modifier token.
+2. Separated values - allows modifying two values on Experience and Modifier token separately.
+
+Dynamic counters:
+Value on tokens with numbers can be increased with LMB and decreased with RMB.
