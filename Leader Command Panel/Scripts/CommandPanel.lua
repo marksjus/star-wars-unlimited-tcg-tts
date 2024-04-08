@@ -1,29 +1,30 @@
 --- Configuration table.
 -- NOT saved onSave. 
 CONSTANTS = {
-  redLeaderScriptingZoneGIUD = "e408b6",
-  redHandZoneGIUD = "99b44d",
-  blueLeaderScriptingZoneGIUD = "07462e",
-  blueHandZoneGIUD = "e59bda",
-  bgColor = "#000000",
-  buttonColor = "#ffffff",
+  redLeaderScriptingZoneGIUD = "e408b6", -- string: GIUD of a red player leader scripting zone.
+  redHandZoneGIUD = "99b44d", -- string: GIUD of a red player hand zone.
+  blueLeaderScriptingZoneGIUD = "07462e", -- string: GIUD of a blue player leader scripting zone.
+  blueHandZoneGIUD = "e59bda", -- string: GIUD of a blue player hand zone.
+  bgColor = "#000000", -- string: Panel background color.
+  buttonColor = "#ffffff", -- string: Button background color.
   textFontColor = "#ffffff", -- string: Text color.
-  buttonFontColor = "#000000", -- string: Text color.
+  buttonFontColor = "#000000", -- string: Button text color.
   fontSize = 30, -- number: Font size.
 }
 
 --- Variables table.
+-- Do not modify!
 -- Saved onSave and load on Load.
 VARIABLES = {
-  peeking = false,
-  revealing = false,
-  player = "",
-  blueDeckScriptingZoneGIUD = "",
-  redDeckScriptingZoneGIUD = "",
-  hiddenZoneGIUD = "",
-  ownerCardGIUD = "",
-  enemyCardGIUD = "",
-  leaderName = "",
+  peeking = false, -- bool: Set true while peeking.
+  revealing = false, -- bool: Set true while revealing.
+  player = "", -- string: Owner color, see: setOwner().
+  redDeckScriptingZoneGIUD = "", -- string: GIUD of a red deck scripting zone.
+  blueDeckScriptingZoneGIUD = "", -- string: GIUD of a blue deck scripting zone.
+  hiddenZoneGIUD = "", -- string: GIUD of a player hand zone for peeking.
+  ownerCardGIUD = "", -- string: GIUD of owner card set after fetching owner card.
+  enemyCardGIUD = "", -- string: GIUD of enemy card set after fetching enemy card.
+  leaderName = "", -- string: Name of a Leader card in the leader scripting zone.
 }
 
 --- Loads saved data.
