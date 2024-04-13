@@ -1,22 +1,29 @@
+--- Configuration table.
+-- NOT saved onSave. 
 CONSTANTS = {
-  resourceScriptingZoneGUID = "06b581",
+  resourceScriptingZoneGUID = "06b581", -- string: GIUD of a resource scripting zone.
   bgColor = "#000000", -- string: Panel background color.
   textColor = "#ffffff", -- string: Text color.
   fontSize = 200, -- number: Font size.
   buttonColor = "#ffffff", -- string: Button background color.
   buttonTextColor = "#000000", -- string: Button text color. 
-  buttonFontSize = 70, -- number: Font size.
-  readyResourcesTextColor = "#1382AB", -- string: Button text color.
-  zeroResourcesTextColor = "#A01D1D", -- string: Button text color.
+  buttonFontSize = 70, -- number: Button font size.
+  readyResourcesTextColor = "#1382AB", -- string: Available resource count text color.
+  zeroResourcesTextColor = "#A01D1D", -- string: Zero resources text color.
 }
 
+--- Variables table.
+-- Do not modify!
+-- Saved on Save and load on Load.
 VARIABLES = {
-  resourceCards = {},
-  readyCards = 0,
-  boardcount = 0,
+  resourceCards = {}, -- tab: Table of resource cards.
+  readyCards = 0, -- number: Number of ready resources.
 }
 
---Runs whenever game is saved/autosaved
+--- Saves variables table.
+-- TTS API called on save/autosave for every object.
+-- Encodes parameter table to JSON and returns it as saved data.
+--@treturn tab saved_data JSON encoded table.
 function onSave()
  --Begin State Managment of Saving VARIABLES.resourceCards Object list.
  --Create GUID list fomr Object List
@@ -33,7 +40,12 @@ function onSave()
 
 end
 
---Runs when game is loaded
+--- Loads saved data.
+-- TTS API Called when an object is loaded or spawned.
+-- Loads variables table from JSON encoded saved_data if it exists,
+-- sets custom assets, and resets resources.
+-- @tparam tab saved_data JSON encoded table.
+-- @see setResources
 function onLoad(saved_data)
   -- Sets image Assets.
   self.UI.setCustomAssets({
@@ -62,17 +74,19 @@ function onLoad(saved_data)
     --makeButtons()
 end
 
---- Arranges cards i the resource area. 
+--- Arranges cards in the resource area. 
 function setResources()
 
   local cardCount = #VARIABLES.resourceCards
   VARIABLES.readyCards = 0
+  -- Variable for sorted cards.
   local resources = {}
+
   if cardCount ~= 0 then
     local forward = Vector(self.getTransformForward())
     local right = Vector(self.getTransformRight())
 
-    -- Card sorting.
+    -- Card sorting. Ready cards on the left exhausted cards on the right.
     local readyResources = {}
     
     for i=1,#VARIABLES.resourceCards, 1 do
@@ -89,39 +103,37 @@ function setResources()
     end
     VARIABLES.resourceCards = resources
 
-    -- Starting position of the spread is on the right.
+    -- Starting position of the spread is on the bottom right.
     local cardSpread = 0.77
     local startOffset = right * (cardSpread*(cardCount-1))
     local cardSize = resources[1].card.getBoundsNormalized().size 
     local Z = self.getPosition().z
-    local Y = self.getPosition().y-self.getBoundsNormalized().size.y/2 + 0.02 + cardSize.y * cardCount
+    local Y = self.getPosition().y-self.getBoundsNormalized().size.y/2 + 0.02
     local X = self.getPosition().x+self.getBoundsNormalized().size.x/2 + 0.5 + startOffset.x + cardSize.z/2
     
     self.clearButtons()
-    -- loop table in reverse. From right to left. 
+    -- loop table in reverse. From right to left, and bottom to top.
     for i=#resources, 1, -1 do 
-      resources[i].card.lock() 
-      -- Horizontal cards are placed lower, and vertical cards are farther to the left.      
+      resources[i].card.lock()      
       if resources[i].state == "ready" then        
         resources[i].card.setPositionSmooth({X-((cardSize.z-cardSize.x)/2),Y,Z})
       elseif resources[i].state == "exhausted"  then
         resources[i].card.setPositionSmooth({X,Y,Z-((cardSize.z-cardSize.x)/2)})
       end
-      Y = Y - cardSize.y
+      Y = Y + cardSize.y
       offset = right * cardSpread
       X = X - offset.x
       Z = Z
     end
   end
+
   createUI()
+  -- Waits for cards to start and stop moving, and then add buttons.
   if cardCount ~= 0 then
     Wait.time(function() 
       Wait.condition(
         function() 
           addCardButtons()  
-          --for i=1, #resources, 1 do
-          --  addCardButton(resources[i].card.getPosition(), resources[i].card.getBoundsNormalized().size, resources[i].state)
-          --end
         end,
         function()
           local condition = true
@@ -139,27 +151,32 @@ function setResources()
   end
 end
 
+--- Clears all card buttons.
 function clearCardButtons()
   local oldUI = self.UI.getXmlTable()
   local newUI = {}
+  -- Gets only the UI panel, and sets it as new UI.
   table.insert(newUI, oldUI[1])
   self.UI.setXmlTable(newUI)
 end
 
+--- Adds buttons for exhausting and readying the cards.
 function addCardButtons()
   local scale = self.getScale()
   local thickness = self.getCustomObject().thickness
   local resources = VARIABLES.resourceCards
   local oldUI = self.UI.getXmlTable()
   local newUI = {}
-
+  -- Gets only the UI panel from the old UI.
   table.insert(newUI, oldUI[1])
-  --table.insert(newUI, oldUI[2])
+
   for i=1, #resources, 1 do
+
+    -- Sets button position to top right corner of the card.
     local cardPosition = resources[i].card.getPosition()
     local cardSize = resources[i].card.getBounds().size
-    local buttonPosition = Vector(cardPosition) + Vector(-cardSize.x/2,cardSize.y/2,cardSize.z/2)
-    local offset = Vector(50,-1,-50)
+    local buttonPosition = Vector(cardPosition) + Vector(cardSize.x/2,cardSize.y/2,cardSize.z/2)
+    local offset = Vector(-50,-1,-50)
     local localButtonPosition = Vector(self.positionToLocal(buttonPosition)):scale(100,-100,100) + offset
     
     local clickFunction = "onReadyButtonClick"
@@ -191,6 +208,9 @@ function addCardButtons()
   self.UI.setXmlTable(newUI)
 end
 
+-- Event called after user clicks ready button.
+-- @tparam string id Button ID.
+-- @see addCardButtons
 function onReadyButtonClick(_, _, id)
 
   local i = id:match(self.getGUID().."CardButton(%d+)")
@@ -203,13 +223,16 @@ function onReadyButtonClick(_, _, id)
   end
 end
 
-
+-- Event called after user clicks exhaust button.
+-- @tparam string id Button ID.
+-- @see addCardButtons
 function onExhaustButtonClick(_, _, id)
 
   local i = id:match(self.getGUID().."CardButton(%d+)")
   
   if i ~= nil then
     i = tonumber(i)
+    -- Loops for all previous cards to exhaust more than one.
     for n=1, i, 1 do
       VARIABLES.resourceCards[n].card.setRotationSmooth({0,self.getRotation().y+270,180})
       VARIABLES.resourceCards[n].state = "exhausted"
@@ -218,7 +241,10 @@ function onExhaustButtonClick(_, _, id)
   end
 end
 
+--- Readies all Card.
+-- Called externally from the Ready Panel.
 function readyAllCards()
+  -- Check if any card is exhausted, to save performance and IU recreation.
   local isAnyExhausted = false
   for i=1, #VARIABLES.resourceCards, 1 do
     if VARIABLES.resourceCards[i].state == "exhausted" then
@@ -346,6 +372,8 @@ function createUI()
   self.UI.setXmlTable(ui)
 end
 
+-- Event called after user clicks unlock button.
+-- @see createUI
 function onUnlockAllCards()
   clearCardButtons()
   for i=1, #VARIABLES.resourceCards, 1 do
@@ -358,6 +386,7 @@ function onUnlockAllCards()
     VARIABLES.resourceCards[i].card.setPositionSmooth(position)
     VARIABLES.resourceCards[i].state = "unlocked"
   end
+  -- Waits until all the cards stop moving before unlocking them.
   Wait.condition(
     function()
       for i=1, #VARIABLES.resourceCards, 1 do
@@ -385,6 +414,7 @@ end
 -- @tparam obj zone Zone that was entered.
 -- @tparam obj object Object that entered the zone.
 function onObjectEnterZone(zone, object)
+  -- Checks if the card is in "unlocked" state.
   local unlockedCard = false
   for i=1, #VARIABLES.resourceCards, 1 do
     if object == VARIABLES.resourceCards[i].card and VARIABLES.resourceCards[i].state == "unlocked" then
@@ -394,6 +424,7 @@ function onObjectEnterZone(zone, object)
   end
   if zone.getGUID() == CONSTANTS.resourceScriptingZoneGUID  and not unlockedCard then
     if object.hasTag("Card") and object.type == "Card" then
+      -- Wait a second to check if card stayed in the zone or just passing.
       Wait.time(
         function() 
           local zoneOccupants = zone.getObjects()
@@ -409,9 +440,9 @@ function onObjectEnterZone(zone, object)
             local resource = {
               card = object,
               state = "exhausted",
-              --state = "ready",
             } 
             table.insert(VARIABLES.resourceCards, resource)
+            -- Wait until the card stops moving before resetting the resources. 
             Wait.condition(
               function()                     
                 setResources()
@@ -441,6 +472,7 @@ function onObjectLeaveZone(zone, object)
       for i=1, #VARIABLES.resourceCards, 1 do
         
         if VARIABLES.resourceCards[i].card == object then
+          -- Checks if the card is in "unlocked" state.
           if VARIABLES.resourceCards[i].state == "unlocked" then
             unlockedCard = true
           end
@@ -449,23 +481,9 @@ function onObjectLeaveZone(zone, object)
         end
       end
     end
+    -- Resets resources only for a "proper" card.
     if not unlockedCard then
       setResources()
     end
   end
-end
-
---- Print table
-function printTable(obj,option)
-  if type(obj) ~= 'table' then return obj end
-  local res = {}
-  for k, v in pairs(obj) do
-    if option == "s" then
-      print(k..": ",v)
-    else
-      print(k..": ",printTable(v))
-    end
-  end
-  print("--")
-  return res
 end
