@@ -25,19 +25,25 @@ VARIABLES = {
 -- Encodes parameter table to JSON and returns it as saved data.
 --@treturn tab saved_data JSON encoded table.
 function onSave()
- --Begin State Managment of Saving VARIABLES.resourceCards Object list.
- --Create GUID list fomr Object List
-  --  if #VARIABLES.resourceCards == 0 then saved_data = "" return saved_data
-  --  else
-  --      local objectGUIDlist_sv = {}
-  --      for i = 1, #VARIABLES.resourceCards do table.insert(objectGUIDlist_sv, VARIABLES.resourceCards[i].getGUID()) end
-  --      local data_to_save = { dc=objectGUIDlist_sv }
-     -- Save Code
-  --     saved_data = JSON.encode(data_to_save)
-     --saved_data = "" --Remove -- at start + save to clear save data
-  --     return saved_data
-  --  end
-
+  if #VARIABLES.resourceCards == 0 then 
+    saved_data = "" 
+    return saved_data
+  else      
+    local cardGUIDTable = {}
+    -- Create resource table with GUID list from object list.
+    for i=1, #VARIABLES.resourceCards do
+      local resource = {
+        card = VARIABLES.resourceCards[i].card.getGUID(),
+        state = VARIABLES.resourceCards[i].state,
+      } 
+      table.insert(cardGUIDTable, resource)
+    end
+    local data_to_save = { 
+      resources = cardGUIDTable,
+    }
+    saved_data = JSON.encode(data_to_save)
+    return saved_data
+  end
 end
 
 --- Loads saved data.
@@ -47,6 +53,22 @@ end
 -- @tparam tab saved_data JSON encoded table.
 -- @see setResources
 function onLoad(saved_data)
+  if saved_data ~= "" then
+    -- Load Data from save file.
+    local loaded_data = JSON.decode(saved_data)
+    local cardGUIDTable = loaded_data.resources
+    VARIABLES.resourceCards = {}
+    -- Create resource table with object list from GUID list.
+    for i = 1, #cardGUIDTable do 
+      local resource = {
+        card = getObjectFromGUID(cardGUIDTable[i].card),
+        state = cardGUIDTable[i].state,
+      } 
+      table.insert(VARIABLES.resourceCards, resource)
+    end
+  else
+    VARIABLES.resourceCards = {}
+  end
   -- Sets image Assets.
   self.UI.setCustomAssets({
     {
@@ -58,20 +80,8 @@ function onLoad(saved_data)
       url = "http://cloud-3.steamusercontent.com/ugc/2495632040039054817/604AD7BE9AEAB8C0D39C77BEFFD8FC0179622FBC/"
     }
   })
-  setResources()
- --Loads the tracking for if the game has started yet
-    --if saved_data ~= "" then
-     -- Load Data from save file and add to tmp variable.
-    --    local loaded_data = JSON.decode(saved_data)
-    --    local objectGUIDlist_ld = loaded_data.dc
-    --    VARIABLES.resourceCards = {}
-        --load Data in tmp_Variable, take the GUIDs and turn them into objects and add to script variable.
-    --    for i = 1, #objectGUIDlist_ld do table.insert(VARIABLES.resourceCards, getObjectFromGUID(objectGUIDlist_ld[i])) end
-    --else
-    --    VARIABLES.resourceCards = {}
-    --end
 
-    --makeButtons()
+  setResources()
 end
 
 --- Arranges cards in the resource area. 
