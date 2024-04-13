@@ -297,12 +297,12 @@ function createUI()
         {
           tag = "Panel",
           attributes = {
-            offsetXY = "0 90",
             rotation = "0 0 0",
             color = CONSTANTS.bgColor,
             width = 700,
-            height = 515,
+            height = 520,
             allowDragging = "false",
+            rectAlignment = "UpperCenter",
             childAlignment = "UpperLeft",
           }, 
           children = {
@@ -348,15 +348,15 @@ function createUI()
         {
           tag = "Panel",
           attributes = {
-            offsetXY = "0 -260",
             rotation = "0 0 0",
             color = CONSTANTS.bgColor,
             width = 700,
-            height = 175,
+            height = 180,
             allowDragging = "false",
             childAlignment = "LowerRight",
             childForceExpandHeight = "false",
             childForceExpandWidth = "false",
+            rectAlignment = "LowerCenter",
           }, 
           children = {
             {
