@@ -14,7 +14,7 @@ CONSTANTS = {
 
 --- Variables table.
 -- Do not modify!
--- Saved onSave and load on Load.
+-- Saved on Save and load on Load.
 VARIABLES = {
   peeking = false, -- bool: Set true while peeking.
   revealing = false, -- bool: Set true while revealing.
@@ -60,7 +60,10 @@ function validateZones()
 end
 
 --- Reset the panel.
-function onResetAll()
+function onResetAll() 
+  VARIABLES.revealing = false
+  onDeckPeekReturn()
+  VARIABLES.peeking = false
   destroyDecksScriptingZone()
   destroyHiddenZone()
   setOwner()
