@@ -115,20 +115,22 @@ function setResources()
 
     -- Starting position of the spread is on the bottom right.
     local cardSpread = 0.77
-    local startOffset = right * (cardSpread*(cardCount-1))
     local cardSize = resources[1].card.getBoundsNormalized().size 
+    local startOffset = right * (cardSpread*(cardCount-1) + self.getBoundsNormalized().size.x/2 + 0.5 + cardSize.z/2) 
     local Z = self.getPosition().z
-    local Y = self.getPosition().y-self.getBoundsNormalized().size.y/2 + 0.02
-    local X = self.getPosition().x+self.getBoundsNormalized().size.x/2 + 0.5 + startOffset.x + cardSize.z/2
+    local Y = self.getPosition().y - self.getBoundsNormalized().size.y/2 + 0.02
+    local X = self.getPosition().x + startOffset.x
     
     self.clearButtons()
+    local xOffset = Vector(right * ((cardSize.z-cardSize.x)/2)).x
+    local zOffset = Vector(forward * ((cardSize.z-cardSize.x)/2)).z
     -- loop table in reverse. From right to left, and bottom to top.
     for i=#resources, 1, -1 do 
       resources[i].card.lock()      
-      if resources[i].state == "ready" then        
-        resources[i].card.setPositionSmooth({X-((cardSize.z-cardSize.x)/2),Y,Z})
+      if resources[i].state == "ready" then       
+        resources[i].card.setPositionSmooth({X-xOffset,Y,Z})
       elseif resources[i].state == "exhausted"  then
-        resources[i].card.setPositionSmooth({X,Y,Z-((cardSize.z-cardSize.x)/2)})
+        resources[i].card.setPositionSmooth({X,Y,Z-zOffset})
       end
       Y = Y + cardSize.y
       offset = right * cardSpread
@@ -169,7 +171,8 @@ function clearCardButtons()
   table.insert(newUI, oldUI[1])
   self.UI.setXmlTable(newUI)
 end
-
+local forward = Vector(self.getTransformForward())
+local right = Vector(self.getTransformRight())
 --- Adds buttons for exhausting and readying the cards.
 function addCardButtons()
   local scale = self.getScale()
@@ -185,7 +188,9 @@ function addCardButtons()
     -- Sets button position to top right corner of the card.
     local cardPosition = resources[i].card.getPosition()
     local cardSize = resources[i].card.getBounds().size
-    local buttonPosition = Vector(cardPosition) + Vector(cardSize.x/2,cardSize.y/2,cardSize.z/2)
+    local xOffset = Vector(right * (cardSize.x/2)).x
+    local zOffset = Vector(forward * (cardSize.z/2)).z
+    local buttonPosition = Vector(cardPosition) + Vector(xOffset,cardSize.y/2,zOffset)
     local offset = Vector(-50,-1,-50)
     local localButtonPosition = Vector(self.positionToLocal(buttonPosition)):scale(100,-100,100) + offset
     
@@ -390,7 +395,9 @@ function onUnlockAllCards()
     VARIABLES.resourceCards[i].card.setRotationSmooth({0,self.getRotation().y+180,180})
     local position = Vector(0,0,0)
     local cardSize = VARIABLES.resourceCards[i].card.getBoundsNormalized().size 
-    position.x = self.getPosition().x + self.getBoundsNormalized().size.x/2 + 0.5 + cardSize.z/2
+    local right = Vector(self.getTransformRight())  
+    local startOffset = right * (self.getBoundsNormalized().size.x/2 + 0.5 + cardSize.z/2) 
+    position.x = self.getPosition().x + startOffset.x
     position.y = VARIABLES.resourceCards[i].card.getPosition().y
     position.z = self.getPosition().z
     VARIABLES.resourceCards[i].card.setPositionSmooth(position)
