@@ -90,7 +90,7 @@ function untap(clicked_object, player)
   end
 
   -- Resource Panel
-  local resourcePanelGUID = "4d8b04"  -- Replace _ with the actual GUID of the leader zone
+  local resourcePanelGUID = "4d8b04"  -- Replace _ with the actual GUID of the Resource panel
   local resourcePanel = getObjectFromGUID(resourcePanelGUID)
   if resourcePanel ~= nil then
     resourcePanel.call("readyAllCards")
