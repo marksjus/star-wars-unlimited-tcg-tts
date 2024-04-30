@@ -23,6 +23,12 @@ function onload(saved_data)
   createAll()
 end
 
+--- Updates saved data of the token.
+function updateSave()
+  local dataToSave = JSON.encode(CONFIG)
+  self.script_state = dataToSave
+end
+
 --- Saves all the data.
 -- TTS API called on save/autosave for every object.
 -- Encodes parameter table to JSON and returns it as saved data.
@@ -83,12 +89,14 @@ end
 --- Modify value of the counter.
 -- @tparam bool alt_click RMB flag.
 -- @see updateVal
+-- @see updateSave
 function add_subtract(_, _, alt_click)
   mod = alt_click and -1 or 1
   new_value = math.min(math.max(CONFIG.VALUE + mod, CONFIG.MIN_VALUE), CONFIG.MAX_VALUE)
   if CONFIG.VALUE ~= new_value then
     CONFIG.VALUE = new_value
     updateVal()
+    updateSave()
   end
 end
 

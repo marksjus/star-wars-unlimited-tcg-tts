@@ -42,6 +42,12 @@ function onload(saved_data)
   createAll()
 end
 
+--- Updates saved data of the token.
+function updateSave()
+  local dataToSave = JSON.encode(CONFIG)
+  self.script_state = dataToSave
+end
+
 --- Saves all the data.
 -- TTS API called on save/autosave for every object.
 -- Encodes parameter table to JSON and returns it as saved data.
@@ -143,6 +149,7 @@ end
 --- Modify value of both counters.
 -- @tparam bool alt_click RMB flag.
 -- @see updateVal
+-- @see updateSave
 function add_subtract(_, _, alt_click)
   local mod = alt_click and -1 or 1
   local new_value = math.min(math.max(CONFIG.VALUE1 + mod, CONFIG.MIN_VALUE), CONFIG.MAX_VALUE)
@@ -150,31 +157,35 @@ function add_subtract(_, _, alt_click)
     CONFIG.VALUE1 = new_value
     CONFIG.VALUE2 = new_value
     updateVal()
+    updateSave()
   end
 end
 
 --- Modify value of the first counter and call for updateVal.
 -- @tparam bool alt_click RMB flag.
 -- @see updateVal
+-- @see updateSave
 function add_subtract1(_, _, alt_click)
   local mod = alt_click and -1 or 1
   local new_value = math.min(math.max(CONFIG.VALUE1 + mod, CONFIG.MIN_VALUE), CONFIG.MAX_VALUE)
   if CONFIG.VALUE1 ~= new_value then
     CONFIG.VALUE1 = new_value
     updateVal()
+    updateSave()
   end
 end
 
 --- Modify value of the second counter and call for updateVal.
 -- @tparam bool alt_click RMB flag.
 -- @see updateVal
--- @see updateVal
+-- @see updateSave
 function add_subtract2(_, _, alt_click)
   local mod = alt_click and -1 or 1
   local new_value = math.min(math.max(CONFIG.VALUE2 + mod, CONFIG.MIN_VALUE), CONFIG.MAX_VALUE)
   if CONFIG.VALUE2 ~= new_value then
     CONFIG.VALUE2 = new_value
     updateVal()
+    updateSave()
   end
 end
 
